@@ -1,0 +1,15 @@
+@startuml context diagram crypto trading bot
+!include <C4/C4_Context>
+
+title Crypto Trading Bot - System Context
+
+Person(user, "Gebruiker", "Configureert, backtest en analyseert een strategie voor een crypto currency.")
+
+System(system, "Crypto Trading Platform", "Platform waarop historische en realtime marktdata wordt verzameld, strategieën worden uitgevoerd en trades geplaatst kunnen worden.")
+
+System_Ext(broker, "HyperLiquid API", "Levert realtime en historische marktdata en verwerkt koop- en verkooporders.")
+
+Rel(user, system, "Configureert strategieën,\nbekijkt prestaties")
+Rel(system, broker, "Haalt marktdata op\n en plaatst orders", "REST API / WebSocket")
+
+@enduml

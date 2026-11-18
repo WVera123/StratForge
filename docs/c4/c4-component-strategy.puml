@@ -1,0 +1,19 @@
+@startuml component diagram trading engine
+!include <C4/C4_Component>
+
+title Strategy Module - Component Diagram
+
+ContainerDb_Ext(db, "PostgreSQL", "PostgreSQL", "Historische marktdata en uitgevoerde trades.")
+
+Container_Boundary(module, "Strategy Module") {
+
+    Component(editor,"Strategy Editor","React/JavaScript","Maakt mogelijk om strategieën te ontwikkelen voor een crypto currency o.b.v. drie verschillende principes.")
+
+    Component(repository,"Strategy Repository","Python","Slaat gemaakte strategieën op.")
+}
+
+Rel(editor, repository, "Geeft geconfigureerde strategie door")
+
+Rel(repository, db, "Haalt historische marktdata op en slaat strategieconfiguraties op")
+
+@enduml

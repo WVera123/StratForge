@@ -1,0 +1,40 @@
+@startuml container diagram StratForge
+!include <C4/C4_Container>
+
+title StratForge - Container Diagram
+
+Person(user, "Gebruiker", "Configureert, backtest en analyseert een strategie voor een crypto currency.")
+
+System_Ext(broker, "HyperLiquid API", "Levert realtime en historische marktdata en verwerkt koop- en verkooporders.")
+
+System_Boundary(system, "Crypto Trading Platform") {
+
+    Container(data,"Data Collector Module","Python","Haalt historische en realtime marktdata op en distribueert live marktdata.")
+
+    Container(strategy,"Strategy Module","Python","Maakt mogelijk om strategieën te ontwikkelen voor een crypto currency en op te slaan.")
+
+    Container(backtest,"Backtesting Module","Python","Voert strategieën uit op historische marktdata en toont resultaten.")
+
+    Container(trader, "Automated Trading Module", "Python", "Voert strategieën uit op realtime marktdata en plaatst orders.")
+}
+
+ContainerDb_Ext(db,"PostgreSQL","PostgreSQL","Historische marktdata en uitgevoerde trades.")
+
+Rel(user, system,"Gebruikt")
+
+Rel(data, broker,"Haalt historische data op","REST API")
+
+Rel(data, broker,"Ontvangt live marktdata","WebSocket")
+
+Rel(data, trader,"Stuurt live marktdata")
+
+Rel(trader, broker,"Plaatst orders","REST API")
+
+Rel(trader, db, "Haalt strategieconfiguraties op")
+
+Rel(strategy, db, "Haalt historische marktdata en strategieconfiguraties op en slaat strategieconfiguraties op")
+
+Rel(data, db,"Slaat marktdata op")
+
+Rel(backtest, db, "Haalt historische marktdata\nen strategieconfiguraties op")
+@enduml

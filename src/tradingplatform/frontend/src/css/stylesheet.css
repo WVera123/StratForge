@@ -1,0 +1,80 @@
+
+:root {
+  /* Brand */
+  --sf-accent: #5D5FEF;
+  --sf-accent-hover: #4D4FD8;
+  --sf-accent-soft: #F0F0FF;
+  --sf-accent-border: #DADAFE;
+
+  /* Typography */
+  --sf-heading: #20283F;
+  --sf-body: #6F7890;
+  --sf-muted: #929AAF;
+  --sf-subtle: #AAB1C2;
+  --sf-font: "Manrope", sans-serif;
+  --sf-weight-regular: 400;
+  --sf-weight-medium: 500;
+  --sf-weight-semibold: 600;
+  --sf-weight-bold: 700;
+  --sf-weight-extrabold: 800;
+
+  /* Backgrounds and surfaces */
+  --sf-page: #F4F6FD;
+  --sf-page-top: #F7F8FE;
+  --sf-surface: #FFFFFF;
+  --sf-surface-soft: #F7F8FC;
+  --sf-surface-muted: #F0F2F9;
+  --sf-background-selected: #F7F6FF;
+  --sf-background-hover: #F9F9FF;
+
+  /* Borders and shadows */
+  --sf-border: #DDE2F0;
+  --sf-border-soft: #E9ECF5;
+  --sf-shadow-card: 0 2px 10px rgba(32, 40, 63, 0.025);
+  --sf-shadow-hover: 0 10px 28px rgba(32, 40, 63, 0.075);
+
+  /* Semantic accents */
+  --sf-purple: #5D5FEF;
+  --sf-pink: #E85DAF;
+  --sf-pink-soft: #FFF1F8;
+  --sf-teal: #438D91;
+  --sf-teal-soft: #EFF8F8;
+  --sf-amber: #A9792E;
+  --sf-amber-soft: #FBF6ED;
+
+  /* Shape and layout */
+  --sf-radius-sm: 8px;
+  --sf-radius-md: 12px;
+  --sf-radius-lg: 17px;
+  --sf-radius-xl: 20px;
+  --sf-content-max: 1600px;
+  --sf-page-gutter: 28px;
+
+  /* Motion */
+  --sf-transition: 160ms ease;
+}
+
+html,
+body,
+#root,
+button,
+input,
+select,
+textarea {
+  font-family: var(--sf-font);
+}
+
+body {
+  color: var(--sf-heading);
+  background: var(--sf-page);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--sf-heading);
+  font-family: var(--sf-font);
+  font-weight: var(--sf-weight-bold);
+}
+
+p {
+  color: var(--sf-body);
+}

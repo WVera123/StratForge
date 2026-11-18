@@ -1,0 +1,21 @@
+@startuml component diagram trading engine
+!include <C4/C4_Component>
+
+title Automated Trading Module - Component Diagram
+
+ContainerDb_Ext(db, "PostgreSQL", "PostgreSQL", "Historische marktdata en uitgevoerde trades.")
+Container_Ext(data, "Data Collector Module", "Python", "Distribueert realtime marktdata.")
+System_Ext(broker, "HyperLiquid API", "Verwerkt koop- en verkooporders.")
+
+Container_Boundary(module, "Automated Trading Module") {
+    Component(controller,"Trading Controller","Python","Stuurt de uitvoering van strategieën aan en verwerkt live marktdata.")
+
+    Component(order,"Order Manager","Python","Verstuurt goedgekeurde orders naar HyperLiquid.")
+}
+
+Rel(controller, data, "Haalt live marktdata op")
+Rel(controller, order, "Verwerkt order signaal")
+Rel(order, broker, "Voert order uit", "REST API")
+Rel(controller, db, "Haalt strategieconfiguraties op")
+
+@enduml
