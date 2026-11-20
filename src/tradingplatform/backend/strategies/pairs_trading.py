@@ -2,9 +2,10 @@ import numpy as np
 import pandas as pd
 
 from indicators.indicator_service import IndicatorService
+from .base_strategy import BaseStrategy
 
 
-class PairsTradingStrategy:
+class PairsTradingStrategy(BaseStrategy):
 
     def run(
         self,

@@ -7,6 +7,3 @@ class SettingsUpdate(BaseModel):
     slippage: float = Field(default=0.0, ge=0.0)
     positionSizing: str = Field(default="fixed")
     positionAllocation: float = Field(default=100.0, ge=0.0, le=100.0)
-
-class SettingsResponse(SettingsUpdate):
-    pass

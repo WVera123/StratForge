@@ -1,13 +1,17 @@
-from datetime import datetime
-from typing import Any
-from pydantic import BaseModel
+from datetime import date
+from pydantic import BaseModel, Field
 
-class BacktestSaved(BaseModel):
-    id: int
-    strategy_id: int
-    instrument_id: int
-    instrument2_id: int | None = None
-    start_time: datetime
-    end_time: datetime
-    strategy_snapshot: dict[str, Any]
-    created_at: datetime
+class BacktestRequest(BaseModel):
+    strategy_id: int = Field(..., gt=0)
+    crypto1: int = Field(..., gt=0)
+    crypto2: int | None = Field(default=None, gt=0)
+    timeframe: str = Field(..., pattern=r"^(1m|1h|1d)$")
+    train_start_date: date
+    train_end_date: date
+    test_start_date: date
+    test_end_date: date
+    position_sizing: str = Field(default="fixed")
+    position_allocation: float = Field(default=1.0, ge=0.0, le=1.0)
+    initial_capital: float = Field(default=10000.0, gt=0)
+    fee_rate: float = Field(default=0.0, ge=0.0)
+    slippage_rate: float = Field(default=0.0, ge=0.0)

@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 
 from indicators.indicator_service import IndicatorService
+from .base_strategy import BaseStrategy
 
 
-class MeanReversionStrategy:
+class MeanReversionStrategy(BaseStrategy):
 
     def run(
         self,

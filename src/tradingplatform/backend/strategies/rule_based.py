@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
+from .base_strategy import BaseStrategy
 
 
-class RuleBasedStrategy:
+class RuleBasedStrategy(BaseStrategy):
 
     VARIABLE_ALIASES = {
         "price": "price",
