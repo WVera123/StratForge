@@ -1,15 +1,14 @@
-@startuml context diagram crypto trading bot
+@startuml context diagram StratForge
 !include <C4/C4_Context>
 
-title Crypto Trading Bot - System Context
+LAYOUT_WITH_LEGEND()
 
-Person(user, "Gebruiker", "Configureert, backtest en analyseert een strategie voor een crypto currency.")
+title StratForge - System Context
 
-System(system, "Crypto Trading Platform", "Platform waarop historische en realtime marktdata wordt verzameld, strategieën worden uitgevoerd en trades geplaatst kunnen worden.")
+Person(user, "Gebruiker", "Configureert en bewerkt crypto tradingstrategieën, voert previews en backtests uit en bekijkt de resultaten.")
 
-System_Ext(broker, "HyperLiquid API", "Levert realtime en historische marktdata en verwerkt koop- en verkooporders.")
+System(stratforge, "StratForge", "Webplatform voor het configureren, opslaan, vergelijken en backtesten van cryptocurrency-tradingstrategieën met historische marktdata.")
 
-Rel(user, system, "Configureert strategieën,\nbekijkt prestaties")
-Rel(system, broker, "Haalt marktdata op\n en plaatst orders", "REST API / WebSocket")
+Rel(user, stratforge, "Gebruikt", "Browser / HTTPS")
 
 @enduml

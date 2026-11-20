@@ -1,0 +1,465 @@
+
+@startuml strategy
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+package "API layer" {
+
+  package "FastAPI application" {
+    class main {
+      +app: FastAPI
+    }
+  }
+
+  package "API routers" {
+
+    class StrategyRouter {
+      +get_strategies()
+      +get_strategy(strategy_id)
+      +create_strategy(strategy: StrategyCreate)
+      +edit_strategy(strategy_id, strategy: StrategyCreate)
+      +delete_strategy(strategy_id)
+      +get_strategy_parameters(principle)
+      +get_strategy_parameter_groups(principle)
+    }
+
+    class BacktestRouter {
+      +preview_strategy(request: StrategyPreviewRequest)
+      +run_backtest(request: BacktestRequest)
+      +get_backtest_history(strategy_id)
+      +get_backtest_execution(backtest_id)
+    }
+
+    class MarketDataRouter {
+      +get_currencies()
+      +get_market_data(currency, timeframe)
+      +get_market_data_range(currency, timeframe)
+    }
+
+    class SettingsRouter {
+      +get_settings(user_id)
+      +save_settings(settings: SettingsUpdate, user_id)
+    }
+
+    class PrincipleRouter {
+      +get_principles()
+    }
+
+    class PaperTradingRouter {
+      +start(strategy_id)
+      +pause(strategy_id)
+      +stop(strategy_id)
+      +get_status(strategy_id)
+    }
+  }
+}
+
+package "Services" {
+
+  class StrategyService {
+    +get_strategies()
+    +get_strategy(strategy_id)
+    +get_feature_groups(principle)
+    +get_parameters(principle)
+    +create_strategy(strategy)
+    +edit_strategy(strategy_id, strategy)
+    +delete_strategy(strategy_id)
+  }
+
+  class BacktestService {
+    +preview_strategy(request)
+    +run_backtest(request)
+    -filter_requested_range(df, start_date, end_date)
+    -_run_backtest_period(principle, parameters, crypto1, crypto2, timeframe, start_date, end_date, position_sizing, position_allocation, initial_capital, maker_fee, taker_fee, slippage_rate)
+    -_calculate_single_asset_equity_curve(df, position_sizing, position_allocation, initial_capital, maker_fee, taker_fee, slippage_rate)
+    -_calculate_pairs_equity_curve(df, hedge_ratio, position_sizing, position_allocation, initial_capital, maker_fee, taker_fee, slippage_rate)
+    -_calculate_rule_based_equity_curved(df, initial_capital, position_allocation, position_sizing, maker_fee, taker_fee, slippage_rate)
+    -_calculate_equity_metrics(equity_curve, start_date)
+  }
+
+  class BacktestHistoryService{
+    +get_backtest_history(strategy_id)
+    +get_backtest_execution(backtest_id)
+  }
+
+  class MarketDataService {
+    +get_currencies()
+    +get_market_data_one_currency(crypto, timeframe)
+    +get_market_data_range(crypto, timeframe)
+    +subscribe(currency, timeframe)
+    +get_current_candle(currency, timeframe)
+    +save_market_data(market_data)
+  }
+
+  class PaperTradingService {
+    +start(strategy_id)
+    +pause(strategy_id)
+    +stop(strategy_id)
+    +get_status(strategy_id)
+  }
+
+  class SettingsService {
+    +get_settings(user_id)
+    +save_settings(user_id, settings: dict)
+  }
+
+  class PrincipleService {
+    +get_principles()
+  }
+}
+
+package "Strategy definitions" {
+
+  enum StrategyPrinciple {
+    MEAN_REVERSION
+    TREND_FOLLOWING
+    PAIRS_TRADING
+    RULE_BASED
+  }
+
+  abstract class BaseStrategy {
+    +run(df, parameters)
+  }
+
+  class StrategyFactory {
+    +get_strategy(principle): BaseStrategy
+  }
+
+  class MeanReversionParameters {
+    +FEATURE_GROUPS
+    +bollinger_parameters
+    +rsi_parameters
+    +zscore_parameters
+    +vwap_parameters
+    +stop_loss
+    +time_stop
+    +trend_filter
+  }
+
+  class TrendFollowingParameters {
+    +FEATURE_GROUPS
+    +atr_parameters
+    +bollinger_parameters
+    +donchian_parameters
+    +moving_average_parameters
+    +macd_parameters
+    +adx_parameters
+  }
+
+  class PairsTradingParameters {
+    +FEATURE_GROUPS
+    +zscore_parameters
+    +correlation_parameters
+    +cointegration_parameters
+    +stop_parameters
+    +time_stop
+  }
+
+  class RuleBasedParameters {
+    +FEATURE_GROUPS
+    +tokens
+  }
+
+  class MeanReversionStrategy {
+    +run(df, parameters)
+  }
+
+  class TrendFollowingStrategy {
+    +run(df, parameters)
+  }
+
+  class PairsTradingStrategy {
+    +run(df, parameters)
+  }
+
+  class RuleBasedStrategy {
+    +VARIABLE_ALIASES
+    +OPERATOR_ALIASES
+    +ACTIONS
+    +run(df, parameters)
+  }
+
+  BaseStrategy <|-- MeanReversionStrategy
+  BaseStrategy <|-- TrendFollowingStrategy
+  BaseStrategy <|-- PairsTradingStrategy
+  BaseStrategy <|-- RuleBasedStrategy
+
+  StrategyFactory ..> BaseStrategy
+  StrategyFactory ..> StrategyPrinciple
+
+  MeanReversionStrategy ..> MeanReversionParameters
+  TrendFollowingStrategy ..> TrendFollowingParameters
+  PairsTradingStrategy ..> PairsTradingParameters
+  RuleBasedStrategy ..> RuleBasedParameters
+}
+
+package "API schemas (Pydantic)" {
+
+  class StrategyCreate {
+    +user_id
+    +title
+    +crypto1
+    +crypto2
+    +timeframe
+    +principle
+    +start_date
+    +split
+    +parameters
+  }
+
+  class Strategy {
+    +id
+    +user_id
+    +title
+    +principle
+    +start_date
+    +split
+    +parameters
+  }
+
+  class StrategyPreviewRequest {
+    +crypto1
+    +crypto2
+    +timeframe
+    +start_date
+    +end_date
+    +principle
+    +parameters
+    +initial_capital
+    +position_sizing
+    +position_allocation
+    +fee_rate
+    +slippage_rate
+  }
+
+  class BacktestRequest {
+    +strategy_id
+    +crypto1
+    +crypto2
+    +timeframe
+    +train_start_date
+    +train_end_date
+    +test_start_date
+    +test_end_date
+    +position_sizing
+    +position_allocation
+    +initial_capital
+    +fee_rate
+    +slippage_rate
+  }
+
+  class MarketData {
+    +instrument_id
+    +timeframe
+    +timestamp
+    +open
+    +high
+    +low
+    +close
+    +volume
+  }
+
+  class Currency {
+    +id
+    +symbol
+    +base_asset
+    +quote_asset
+  }
+
+  class SettingsUpdate {
+    +initialCapital
+    +takerFee
+    +makerFee
+    +slippage
+    +positionSizing
+    +positionAllocation
+  }
+
+  class Principle {
+    +id
+    +key
+    +title
+  }
+}
+
+package "Domain models" {
+
+  class StrategyEntity {
+    +id
+    +user_id
+    +title
+    +principle
+    +crypto1
+    +crypto2
+    +timeframe
+    +start_date
+    +split
+    +parameters
+  }
+
+  class BacktestExecution {
+    +id
+    +strategy_id
+    +created_at
+    +train_start_date
+    +train_end_date
+    +test_start_date
+    +test_end_date
+    +initial_capital
+    +metrics
+    +equity_curve
+  }
+
+  class Trade {
+    +id
+    +backtest_id
+    +entry_timestamp
+    +exit_timestamp
+    +side
+    +entry_price
+    +exit_price
+    +quantity
+    +profit_loss
+  }
+
+  class User {
+    +id
+    +name
+  }
+
+  User "1" -- "0..*" StrategyEntity : owns
+  StrategyEntity "1" -- "0..*" BacktestExecution : has
+  BacktestExecution "1" *-- "0..*" Trade : contains
+
+  StrategyEntity --> StrategyPrinciple
+}
+
+note top of User
+  User functionality is not
+  implemented yet.
+end note
+
+note right of StrategyEntity
+  Represents the persisted strategy.
+  This is a conceptual domain model,
+  not necessarily a separate Python class.
+end note
+
+package "Repositories" {
+
+  class StrategyRepository {
+    +create_strategy(strategy)
+    +edit_strategy(strategy_id, strategy)
+    +delete_strategy(strategy_id)
+    +get_strategies()
+    +get_strategy_by_id(strategy_id)
+  }
+
+  class BacktestRepository {
+    +save_backtest_execution(execution)
+    +get_backtest_history(strategy_id)
+    +get_backtest_by_id(backtest_id)
+  }
+
+  class MarketDataRepository {
+    +get_currencies()
+    +get_market_data_one_currency(crypto, timeframe, start_date, end_date, limit)
+    +get_pair_market_data(crypto1, crypto2, timeframe, start_date, end_date, limit)
+    +get_market_data_range(crypto, timeframe)
+    +save_live_market_data(market_data)
+  }
+
+  class PaperTradingRepository {
+    +save_order(order)
+    +save_fill(fill)
+    +save_position(position)
+  }
+
+  class SettingsRepository {
+    +get_settings(user_id)
+    +save_settings(user_id, settings_data)
+  }
+
+  class PrincipleRepository {
+    +get_principles()
+  }
+}
+
+package "Indicators" {
+
+  class IndicatorService {
+    +calculate_bollinger_bands(pf, period, std_multiplier)
+    +calculate_rsi(df, period)
+    +calculate_zscore(series, period)
+    +calculate_vwap(df)
+    +calculate_moving_averages(df, short_period, long_period)
+    +calculate_triple_ma(df, fast, medium, slow)
+    +calculate_macd(df, flast, slow, signal)
+    +calculate_adx(df, period)
+    +calculate_donchian(df,period)
+    +calculate_trend_sma(df, period)
+    +calculate_atr_channels(df, atr_period, ma_multiplier, multiplier_upper, multiplier_lower)
+    +calculate_cointegration_pvalue(df))
+    +calculate_mean_reversion_features(df, parameters)
+    +calculate_trend_features(df, parameters)
+    +calculate_pairs_features(df, parameters)
+  }
+}
+
+StrategyRouter ..> StrategyCreate : request
+StrategyRouter ..> Strategy : response
+
+BacktestRouter ..> StrategyPreviewRequest : request
+BacktestRouter ..> BacktestRequest : request
+
+MarketDataRouter ..> Currency : response
+MarketDataRouter ..> MarketData : response
+
+SettingsRouter ..> SettingsUpdate : request
+PrincipleRouter ..> Principle : response
+
+main --> StrategyRouter : registers
+main --> BacktestRouter : registers
+main --> MarketDataRouter : registers
+main --> SettingsRouter : registers
+main --> PrincipleRouter : registers
+main --> PaperTradingRouter : registers
+
+StrategyRouter ..> StrategyService
+BacktestRouter ..> BacktestService
+BacktestRouter ..> BacktestHistoryService
+MarketDataRouter ..> MarketDataService
+SettingsRouter ..> SettingsService
+PrincipleRouter ..> PrincipleService
+PaperTradingRouter ..> PaperTradingService
+
+StrategyService ..> StrategyRepository
+
+BacktestService ..> StrategyRepository
+BacktestService ..> BacktestRepository
+BacktestService ..> MarketDataRepository
+BacktestService ..> StrategyFactory
+
+BacktestHistoryService ..> BacktestRepository
+
+MarketDataService ..> MarketDataRepository
+PaperTradingService ..> PaperTradingRepository
+SettingsService ..> SettingsRepository
+PrincipleService ..> PrincipleRepository
+
+MeanReversionStrategy ..> IndicatorService
+TrendFollowingStrategy ..> IndicatorService
+PairsTradingStrategy ..> IndicatorService
+RuleBasedStrategy ..> IndicatorService
+
+StrategyRepository ..> StrategyEntity
+BacktestRepository ..> BacktestExecution
+BacktestRepository ..> Trade
+
+StrategyCreate --> StrategyPrinciple
+Strategy --> StrategyPrinciple
+StrategyPreviewRequest --> StrategyPrinciple
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml component diagram backend modules
+!include <C4/C4_Component>
+
+LAYOUT_WITH_LEGEND()
+
+title StratForge - Backend Component Diagram
+
+Container(frontend, "Frontend", "React 19, JavaScript, Vite", "Gebruikersinterface voor strategiebeheer, previews, backtests, wiki en instellingen.")
+ContainerDb_Ext(db, "PostgreSQL Database", "PostgreSQL", "Slaat historical data, strategies, instellingen, backtests en trades op.")
+ContainerDb_Ext(exchange, "Exchange API", "REST API, WebSocket", "Externe exchange-API voor het ophalen van live marktdata.")
+
+Container_Boundary(backend, "Backend") {
+    Component(api, "API Layer", "FastAPI", "Exposeert REST-endpoints en valideert requests via Pydantic-schemas.")
+
+    Component(strategy, "Strategy Module", "Python", "Beheert strategiën, parameters en strategy previews.")
+
+    Component(backtest, "Backtest Module", "Python/pandas/NumPy", "Voert train/test-backtests uit en berekent performance en tradegeschiedenis.")
+
+    Component(data, "Data Collector Module", "Python/SQL", "Levert real-time candles, currencies en datumbereiken aan andere modules.")
+
+    Component(paper, "Paper Trading Module", "Voorgesteld/Python", "Zal dezelfde strategy-logica gebruiken voor realtime signaal- en virtual order-execution. Dit component is nog niet geïmplementeerd.")
+
+    Component(settings, "Settings Module", "Python", "Beheert tradinginstellingen zoals capital, fees, slippage en position sizing.")
+}
+
+Rel(frontend, api, "Stuurt HTTP-requests", "JSON / REST API")
+
+Rel(api, strategy, "Staat strategyoperaties toe")
+Rel(api, backtest, "Staat backtestoperaties toe")
+Rel(api, data, "Vraagt marktdata op")
+Rel(api, settings, "Beheert tradinginstellingen")
+Rel(api, paper, "Staat paper-trading operaties toe")
+
+Rel(backtest, strategy, "Haalt strategie-informatie en parameterconfiguratie op")
+Rel(strategy, data, "Vraagt marktdata op")
+Rel(backtest, data, "Vraagt candles op voor train-, test- en combined-periodes")
+Rel(paper, strategy, "Haalt strategie-informatie en parameterconfiguratie op")
+Rel(paper, data, "Haalt live marktdata op")
+
+Rel(data, db, "Schrijft markdatat", "SQL")
+Rel(strategy, db, "Leest/schrijft strategies, principles en instellingen", "SQL")
+Rel(backtest, db, "Leest candles/strategies en schrijft backtests/trades", "SQL")
+Rel(settings, db, "Leest/schrijft instellingen", "SQL")
+Rel(paper, db, "Schrijft orders en portfolio", "SQL")
+
+Rel(data, exchange, "Haalt live marktdata op", "REST API / WebSocket")
+
+@enduml
